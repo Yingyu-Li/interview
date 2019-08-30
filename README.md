@@ -105,10 +105,23 @@ int* const function7();     // 返回一个指向变量的常指针，使用：i
 
 #### 作用
 
-1. 修饰普通变量，修改变量的存储区域和生命周期，使变量存储在静态区，在 main 函数运行前就分配了空间，如果有初始值就用初始值初始化它，如果没有初始值系统用默认值初始化它。
+1. 修饰普通变量，修改变量的存储区域和生命周期，使变量存储在静态区，在 main 函数运行前就分配了空间，如果有初始值就用初始值初始化它，如果没有初始值系统用默认值初始化它。全局静态变量的作用域在所在.c文件。
 2. 修饰普通函数，表明函数的作用范围，仅在定义该函数的文件内才能使用。在多人开发项目时，为了防止与他人命名空间里的函数重名，可以将函数定位为 static。
 3. 修饰成员变量，修饰成员变量使所有的对象只保存一个该变量，而且不需要生成对象就可以访问该成员。
 4. 修饰成员函数，修饰成员函数使得不需要生成对象就可以访问该函数，但是在 static 函数内不能访问非静态成员。
+
+#### 静态变量
+The absolute address addressing mode can only be used with static variables, because those are the only kinds of variables whose location is known by the compiler at compile time. 
+When the program (executable or library) is loaded into memory, static variables are stored in the data segment of the program's address space (if initialized), or the BSS segment (if uninitialized), and are stored in corresponding sections of object files prior to loading.
+static修饰的变量（全局或局部），地址在编译时已确定。若有初始化，存在静态区(.data segment 全局变量&静态变量区)，若无初始化，存在BSS文字常量区。
+全局变量与静态变量均由系统分配和释放内存，若未对它们进行初始化操作，系统将自动将其值设置为0。（堆区与栈区则不会）
+https://en.wikipedia.org/wiki/Static_variable
+https://blog.csdn.net/Filter_CPH/article/details/48524249
+
+全局静态变量的作用域在所在.c文件。局部静态变量作用域在所定义的函数内。
+If global variable is to be visible within only one .c file, you should declare it static.
+If global variable is to be used across multiple .c files, you should not declare it static. Instead you should declare it extern in header file included by all .c files that need it.
+https://stackoverflow.com/questions/1856599/when-to-use-static-keyword-before-global-variables
 
 ### this 指针
 
@@ -1171,6 +1184,22 @@ class doSomething(Flyable *obj)                 // 做些事情
     obj->land();
 };
 ```
+
+### C 和 C++ 的区别
+对于高效，C、C++都能做到，但是对于稳定，C++比C要容易得多。
+C语言：https://en.cppreference.com/w/c/language
+C++：https://en.cppreference.com/w/cpp/language
+多了class，template，exceptions这三个部分，并且每个部分也有新增。
+一场涉及哲学的讨论：https://www.zhihu.com/question/28834538
+C++强大的背后：https://www.cnblogs.com/miloyip/archive/2010/09/17/behind_cplusplus.html
+C++ 对 C 的增强，表现在六个方面：
+增强了类型检查机制
+增加了面向对象的机制
+增加了泛型编程的机制（template）
+增加了异常处理
+增加了重载的机制
+增加了标准模板库（STL）
+简书整理了六点，看了知乎讨论以后觉得这只是特例代表：https://www.jianshu.com/p/2522b07219ae
 
 
 ## ⭐️ Effective
