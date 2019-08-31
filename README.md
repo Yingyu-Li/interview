@@ -112,16 +112,21 @@ int* const function7();     // 返回一个指向变量的常指针，使用：i
 
 #### 静态变量
 The absolute address addressing mode can only be used with static variables, because those are the only kinds of variables whose location is known by the compiler at compile time. 
+
 When the program (executable or library) is loaded into memory, static variables are stored in the data segment of the program's address space (if initialized), or the BSS segment (if uninitialized), and are stored in corresponding sections of object files prior to loading.
-static修饰的变量（全局或局部），地址在编译时已确定。若有初始化，存在静态区(.data segment 全局变量&静态变量区)，若无初始化，存在BSS文字常量区。
-全局变量与静态变量均由系统分配和释放内存，若未对它们进行初始化操作，系统将自动将其值设置为0。（堆区与栈区则不会）
+1. static修饰的变量（全局或局部），地址在编译时已确定。若有初始化，存在静态区(.data segment 全局变量&静态变量区)，若无初始化，存在BSS文字常量区。
+2. 全局变量与静态变量均由系统分配和释放内存，若未对它们进行初始化操作，系统将自动将其值设置为0。（堆区与栈区则不会）
 https://en.wikipedia.org/wiki/Static_variable
 https://blog.csdn.net/Filter_CPH/article/details/48524249
 
-全局静态变量的作用域在所在.c文件。局部静态变量作用域在所定义的函数内。
+3. 全局静态变量的作用域在所在.c文件。局部静态变量作用域在所定义的函数内。
 If global variable is to be visible within only one .c file, you should declare it static.
 If global variable is to be used across multiple .c files, you should not declare it static. Instead you should declare it extern in header file included by all .c files that need it.
 https://stackoverflow.com/questions/1856599/when-to-use-static-keyword-before-global-variables
+
+### 左值和右值
+https://en.cppreference.com/w/cpp/language/value_category
+https://zh.wikipedia.org/wiki/右值引用
 
 ### this 指针
 
@@ -143,7 +148,7 @@ https://stackoverflow.com/questions/1856599/when-to-use-static-keyword-before-gl
 * 相当于不用执行进入函数的步骤，直接执行函数体；
 * 相当于宏，却比宏多了类型检查，真正具有函数特性；
 * 编译器一般不内联包含循环、递归、switch 等复杂操作的内联函数；
-* 在类声明中定义的函数，除了虚函数的其他函数都会自动隐式地当成内联函数。
+* 在类声明中定义的函数，除了虚函数的其他函数都会自动隐式地当成内联函数。 https://en.cppreference.com/w/cpp/language/inline 真的。A function defined entirely inside a class/struct/union definition, whether it's a member function or a non-member friend function, is implicitly an inline function.
 
 #### 使用
 
@@ -174,30 +179,30 @@ inline int A::doA() { return 0; }   // 需要显式内联
 #### 编译器对 inline 函数的处理步骤
 
 1. 将 inline 函数体复制到 inline 函数调用点处； 
-2. 为所用 inline 函数中的局部变量分配内存空间； 
-3. 将 inline 函数的的输入参数和返回值映射到调用方法的局部变量空间中； 
-4. 如果 inline 函数有多个返回点，将其转变为 inline 函数代码块末尾的分支（使用 GOTO）。
+2. 为所用 inline 函数中的【局部变量】分配内存空间； 
+3. 将 inline 函数的的【输入参数和返回值映射】到调用方法的局部变量空间中； 
+4. 如果 inline 函数有【多个返回点】，将其转变为 inline 函数代码块末尾的分支（使用 GOTO）。
 
 #### 优缺点
 
 优点
 
 1. 内联函数同宏函数一样将在被调用处进行代码展开，省去了参数压栈、栈帧开辟与回收，结果返回等，从而提高程序运行速度。
-2. 内联函数相比宏函数来说，在代码展开时，会做安全检查或自动类型转换（同普通函数），而宏定义则不会。 
-3. 在类中声明同时定义的成员函数，自动转化为内联函数，因此内联函数可以访问类的成员变量，宏定义则不能。
-4. 内联函数在运行时可调试，而宏定义不可以。
+2. 内联函数相比宏函数来说，在代码展开时，会做【安全检查或自动类型转换】（同普通函数），而宏定义则不会。 
+3. 在类中声明同时定义的成员函数，自动转化为内联函数，因此内联函数【可以访问类的成员变量】，宏定义则不能。
+4. 内联函数在运行时【可调试】，而宏定义不可以。
 
 缺点
 
 1. 代码膨胀。内联是以代码膨胀（复制）为代价，消除函数调用带来的开销。如果执行函数体内代码的时间，相比于函数调用的开销较大，那么效率的收获会很少。另一方面，每一处内联函数的调用都要复制代码，将使程序的总代码量增大，消耗更多的内存空间。
-2. inline 函数无法随着函数库升级而升级。inline函数的改变需要重新编译，不像 non-inline 可以直接链接。
-3. 是否内联，程序员不可控。内联函数只是对编译器的建议，是否对函数内联，决定权在于编译器。
+2. inline 函数无法随着函数库升级而升级。inline函数的改变【需要重新编译】，不像 non-inline 可以直接链接。
+3. 是否内联，程序员不可控。内联函数【只是对编译器的建议】，是否对函数内联，决定权在于编译器。
 
 #### 虚函数（virtual）可以是内联函数（inline）吗？
 
 > [Are "inline virtual" member functions ever actually "inlined"?](http://www.cs.technion.ac.il/users/yechiel/c++-faq/inline-virtuals.html)
 
-* 虚函数可以是内联函数，内联是可以修饰虚函数的，但是当虚函数表现多态性的时候不能内联。
+* 虚函数可以是内联函数，内联是可以修饰虚函数的，但是【当虚函数表现多态性的时候不能内联】。
 * 内联是在编译器建议编译器内联，而虚函数的多态性在运行期，编译器无法知道运行期调用哪个代码，因此虚函数表现为多态性时（运行期）不可以内联。
 * `inline virtual` 唯一可以内联的时候是：编译器知道所调用的对象是哪个类（如 `Base::who()`），这只有在编译器具有实际对象而不是对象的指针或引用时才会发生。
 
@@ -226,7 +231,7 @@ public:
 
 int main()
 {
-	// 此处的虚函数 who()，是通过类（Base）的具体对象（b）来调用的，编译期间就能确定了，所以它可以是内联的，但最终是否内联取决于编译器。 
+	// 此处的虚函数 who()，是通过类（Base）的具体对象（b）来调用的，【编译期间就能确定了，所以它可以是内联的】，但最终是否内联取决于编译器。 
 	Base b;
 	b.who();
 
